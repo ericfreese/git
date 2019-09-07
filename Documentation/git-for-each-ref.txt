@@ -95,6 +95,9 @@ OPTIONS
 --ignore-case::
 	Sorting and filtering refs are case insensitive.
 
+--no-symbolic::
+	Only list refs that are not symbolic.
+
 FIELD NAMES
 -----------
 

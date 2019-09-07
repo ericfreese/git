@@ -2093,6 +2093,10 @@ static int ref_filter_handler(const char *refname, const struct object_id *oid, 
 		return 0;
 	}
 
+	if (filter->no_symbolic && flag & REF_ISSYMREF) {
+		return 0;
+	}
+
 	/* Obtain the current ref kind from filter_ref_kind() and ignore unwanted refs. */
 	kind = filter_ref_kind(filter, refname);
 	if (!(kind & filter->kind))

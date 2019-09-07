@@ -65,7 +65,8 @@ struct ref_filter {
 	unsigned int with_commit_tag_algo : 1,
 		match_as_path : 1,
 		ignore_case : 1,
-		detached : 1;
+		detached : 1,
+		no_symbolic : 1;
 	unsigned int kind,
 		lines;
 	int abbrev,

@@ -454,4 +454,10 @@ test_expect_success 'validate worktree atom' '
 	test_cmp expect actual
 '
 
+test_expect_success 'filtering with --no-symbolic' '
+	git symbolic-ref refs/symbolic refs/heads/master &&
+	git for-each-ref --format="%(refname)" --no-symbolic >actual &&
+	test_must_fail grep refs/symbolic actual
+'
+
 test_done

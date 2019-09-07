@@ -18,7 +18,7 @@ int cmd_for_each_ref(int argc, const char **argv, const char *prefix)
 {
 	int i;
 	struct ref_sorting *sorting = NULL, **sorting_tail = &sorting;
-	int maxcount = 0, icase = 0;
+	int maxcount = 0, icase = 0, nosym = 0;
 	struct ref_array array;
 	struct ref_filter filter;
 	struct ref_format format = REF_FORMAT_INIT;
@@ -46,6 +46,7 @@ int cmd_for_each_ref(int argc, const char **argv, const char *prefix)
 		OPT_CONTAINS(&filter.with_commit, N_("print only refs which contain the commit")),
 		OPT_NO_CONTAINS(&filter.no_commit, N_("print only refs which don't contain the commit")),
 		OPT_BOOL(0, "ignore-case", &icase, N_("sorting and filtering are case insensitive")),
+		OPT_BOOL(0, "no-symbolic", &nosym, N_("exclude symbolic refs")),
 		OPT_END(),
 	};
 
@@ -72,6 +73,7 @@ int cmd_for_each_ref(int argc, const char **argv, const char *prefix)
 		sorting = ref_default_sorting();
 	sorting->ignore_case = icase;
 	filter.ignore_case = icase;
+	filter.no_symbolic = nosym;
 
 	filter.name_patterns = argv;
 	filter.match_as_path = 1;

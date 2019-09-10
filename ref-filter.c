@@ -2395,9 +2395,10 @@ void show_ref_array_item(struct ref_array_item *info,
 	if (format_ref_array_item(info, format, &final_buf, &error_buf))
 		die("%s", error_buf.buf);
 	fwrite(final_buf.buf, 1, final_buf.len, stdout);
+	if (final_buf.len)
+		putchar('\n');
 	strbuf_release(&error_buf);
 	strbuf_release(&final_buf);
-	putchar('\n');
 }
 
 void pretty_print_ref(const char *name, const struct object_id *oid,

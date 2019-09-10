@@ -42,7 +42,7 @@ test_atom() {
 		 sym) ref=refs/heads/sym ;;
 		   *) ref=$1 ;;
 	esac
-	printf '%s\n' "$3" >expected
+	{ test -n "$3" && printf '%s\n' "$3"; } >expected
 	test_expect_${4:-success} $PREREQ "basic atom: $1 $2" "
 		git for-each-ref --format='%($2)' $ref >actual &&
 		sanitize_pgp <actual >actual.clean &&
@@ -313,7 +313,7 @@ test_expect_success 'Check format of strftime-local date fields' '
 '
 
 test_expect_success 'exercise strftime with odd fields' '
-	echo >expected &&
+	>expected &&
 	git for-each-ref --format="%(authordate:format:)" refs/heads >actual &&
 	test_cmp expected actual &&
 	long="long format -- $ZERO_OID$ZERO_OID$ZERO_OID$ZERO_OID$ZERO_OID$ZERO_OID$ZERO_OID" &&

@@ -563,7 +563,7 @@ void show_log(struct rev_info *opt)
 	const char *extra_headers = opt->extra_headers;
 	struct pretty_print_context ctx = {0};
 
-	opt->loginfo = NULL;
+	opt->loginfo = NULL; /* Seems like this could have just been passed as an arg from log_tree_commit() */
 	if (!opt->verbose_header) {
 		graph_show_commit(opt->graph);
 
@@ -608,6 +608,8 @@ void show_log(struct rev_info *opt)
 		putc(opt->diffopt.line_termination, opt->diffopt.file);
 	}
 	opt->shown_one = 1;
+
+	//fprintf(stdout, "graph_show_commit()\n");
 
 	/*
 	 * If the history graph was requested,
@@ -910,7 +912,7 @@ static int log_tree_diff(struct rev_info *opt, struct commit *commit, struct log
 
 int log_tree_commit(struct rev_info *opt, struct commit *commit)
 {
-	struct log_info log;
+	struct log_info log; /* Reset to GRAPH_COMMIT before we get in here */
 	int shown, close_file = opt->diffopt.close_file;
 
 	log.commit = commit;
@@ -927,7 +929,7 @@ int log_tree_commit(struct rev_info *opt, struct commit *commit)
 	if (!shown && opt->loginfo && opt->always_show_header) {
 		log.parent = NULL;
 		show_log(opt);
-		shown = 1;
+		shown = 1; /* GRAPH_PADDING here */
 	}
 	if (opt->track_linear && !opt->linear && opt->reverse_output_stage)
 		fprintf(opt->diffopt.file, "\n%s\n", opt->break_bar);

@@ -168,7 +168,7 @@ static void cmd_log_init_finish(int argc, const char **argv, const char *prefix,
 						      &decorate_refs_exclude};
 	static struct revision_sources revision_sources;
 
-	const struct option builtin_log_options[] = {
+	const struct option builtin_log_options[] = { /* Log-specific options */
 		OPT__QUIET(&quiet, N_("suppress diff output")),
 		OPT_BOOL(0, "source", &source, N_("show source")),
 		OPT_BOOL(0, "use-mailmap", &mailmap, N_("Use mail map file")),
@@ -188,21 +188,21 @@ static void cmd_log_init_finish(int argc, const char **argv, const char *prefix,
 	line_cb.prefix = prefix;
 
 	mailmap = use_mailmap_config;
-	argc = parse_options(argc, argv, prefix,
+	argc = parse_options(argc, argv, prefix, /* Only handles some of the flags, leaves the others in argv */
 			     builtin_log_options, builtin_log_usage,
 			     PARSE_OPT_KEEP_ARGV0 | PARSE_OPT_KEEP_UNKNOWN |
 			     PARSE_OPT_KEEP_DASHDASH);
 
 	if (quiet)
 		rev->diffopt.output_format |= DIFF_FORMAT_NO_OUTPUT;
-	argc = setup_revisions(argc, argv, rev, opt);
+	argc = setup_revisions(argc, argv, rev, opt); /* The main purpose of this function */
 
 	/* Any arguments at this point are not recognized */
 	if (argc > 1)
 		die(_("unrecognized argument: %s"), argv[1]);
 
 	memset(&w, 0, sizeof(w));
-	userformat_find_requirements(NULL, &w);
+	userformat_find_requirements(NULL, &w); /* Uses pretty.c global `user_format` */
 
 	if (!rev->show_notes_given && (!rev->pretty_given || w.notes))
 		rev->show_notes = 1;
@@ -383,7 +383,7 @@ static int cmd_log_walk(struct rev_info *rev)
 	if (rev->early_output)
 		setup_early_output();
 
-	if (prepare_revision_walk(rev))
+	if (prepare_revision_walk(rev)) /* Hangs for some reason when stepping through */
 		die(_("revision walk setup failed"));
 
 	if (rev->early_output)
@@ -396,7 +396,7 @@ static int cmd_log_walk(struct rev_info *rev)
 	 */
 	rev->diffopt.close_file = 0;
 	while ((commit = get_revision(rev)) != NULL) {
-		if (!log_tree_commit(rev, commit) && rev->max_count >= 0)
+		if (!log_tree_commit(rev, commit) && rev->max_count >= 0) /* This is what actually logs the commit */
 			/*
 			 * We decremented max_count in get_revision,
 			 * but we didn't actually show the commit.
@@ -717,7 +717,7 @@ static void log_setup_revisions_tweak(struct rev_info *rev,
 int cmd_log(int argc, const char **argv, const char *prefix)
 {
 	struct rev_info rev;
-	struct setup_revision_opt opt;
+	struct setup_revision_opt opt; /* Struct of assorted options to pass to setup_revisions() */
 
 	init_log_defaults();
 	git_config(git_log_config, NULL);

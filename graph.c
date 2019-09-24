@@ -260,7 +260,7 @@ struct git_graph *graph_init(struct rev_info *opt)
 {
 	struct git_graph *graph = xmalloc(sizeof(struct git_graph));
 
-	if (!column_colors) {
+	if (!column_colors) { /* Just lazy initialization stuff done the first time through */
 		char *string;
 		if (git_config_get_string("log.graphcolors", &string)) {
 			/* not configured -- use default */
@@ -602,7 +602,7 @@ static void graph_update_columns(struct git_graph *graph)
 	graph_update_width(graph, is_commit_in_columns);
 }
 
-void graph_update(struct git_graph *graph, struct commit *commit)
+void graph_update(struct git_graph *graph, struct commit *commit) /* Called in rev walk iterator get_revision() */
 {
 	struct commit_list *parent;
 
@@ -1199,6 +1199,7 @@ static void graph_output_collapsing_line(struct git_graph *graph, struct strbuf 
 
 int graph_next_line(struct git_graph *graph, struct strbuf *sb)
 {
+	//fprintf(stdout, "state: %d --", graph->state);
 	switch (graph->state) {
 	case GRAPH_PADDING:
 		graph_output_padding_line(graph, sb);
@@ -1270,7 +1271,7 @@ int graph_is_commit_finished(struct git_graph const *graph)
 	return (graph->state == GRAPH_PADDING);
 }
 
-void graph_show_commit(struct git_graph *graph)
+void graph_show_commit(struct git_graph *graph) /* Called for every revision gotten via the walk */
 {
 	struct strbuf msgbuf = STRBUF_INIT;
 	int shown_commit_line = 0;
@@ -1289,6 +1290,8 @@ void graph_show_commit(struct git_graph *graph)
 		graph_show_padding(graph);
 		shown_commit_line = 1;
 	}
+
+	//fprintf(stdout, "inside show: %d\n", graph->state);
 
 	while (!shown_commit_line && !graph_is_commit_finished(graph)) {
 		shown_commit_line = graph_next_line(graph, &msgbuf);

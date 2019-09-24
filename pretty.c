@@ -1628,7 +1628,7 @@ void repo_format_commit_message(struct repository *r,
 					       &context.commit_encoding,
 					       utf8);
 
-	strbuf_expand(sb, format, format_commit_item, &context);
+	strbuf_expand(sb, format, format_commit_item, &context); /* Does the placeholder expansion */
 	rewrap_message_tail(sb, &context, 0, 0, 0);
 
 	/* then convert a commit message to an actual output encoding */

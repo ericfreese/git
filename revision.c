@@ -2393,7 +2393,7 @@ static int handle_revision_pseudo_opt(const char *submodule,
 	struct ref_store *refs;
 	int argcount;
 
-	if (submodule) {
+	if (submodule) {/* Get the appropriate ref_store, in most cases the main one */
 		/*
 		 * We need some something like get_submodule_worktrees()
 		 * before we can go through all worktrees of a submodule,
@@ -2528,7 +2528,7 @@ int setup_revisions(int argc, const char **argv, struct rev_info *revs, struct s
 	if (opt)
 		submodule = opt->submodule;
 
-	/* First, search for "--" */
+	/* First, search for "--". Splits argv at "--" location, assigns remaining to `prune_data */
 	if (opt && opt->assume_dashdash) {
 		seen_dashdash = 1;
 	} else {
@@ -2547,7 +2547,7 @@ int setup_revisions(int argc, const char **argv, struct rev_info *revs, struct s
 	}
 
 	/* Second, deal with arguments and options */
-	flags = 0;
+	flags = 0; /* Flags will be set by `handle_revision_pseudo_opt`. Then they'll be passed to `handle_revision_arg`. e.g. UNINTERESTING, TREESAME, etc */
 	revarg_opt = opt ? opt->revarg_opt : 0;
 	if (seen_dashdash)
 		revarg_opt |= REVARG_CANNOT_BE_FILENAME;
@@ -2556,7 +2556,7 @@ int setup_revisions(int argc, const char **argv, struct rev_info *revs, struct s
 		if (!seen_end_of_options && *arg == '-') {
 			int opts;
 
-			opts = handle_revision_pseudo_opt(submodule,
+			opts = handle_revision_pseudo_opt(submodule, /**/
 						revs, argc - i, argv + i,
 						&flags);
 			if (opts > 0) {
@@ -2592,7 +2592,7 @@ int setup_revisions(int argc, const char **argv, struct rev_info *revs, struct s
 		}
 
 
-		if (handle_revision_arg(arg, revs, flags, revarg_opt)) {
+		if (handle_revision_arg(arg, revs, flags, revarg_opt)) { /**/
 			int j;
 			if (seen_dashdash || *arg == '^')
 				die("bad revision '%s'", arg);
@@ -2613,7 +2613,7 @@ int setup_revisions(int argc, const char **argv, struct rev_info *revs, struct s
 			got_rev_arg = 1;
 	}
 
-	if (prune_data.argc) {
+	if (prune_data.argc) { /* Args before dashdash are all parsed by now, deal with the args after the dashdash */
 		/*
 		 * If we need to introduce the magic "a lone ':' means no
 		 * pathspec whatsoever", here is the place to do so.
@@ -2639,7 +2639,7 @@ int setup_revisions(int argc, const char **argv, struct rev_info *revs, struct s
 		opt->tweak(revs, opt);
 	if (revs->show_merge)
 		prepare_show_merge(revs);
-	if (revs->def && !revs->pending.nr && !revs->rev_input_given && !got_rev_arg) {
+	if (revs->def && !revs->pending.nr && !revs->rev_input_given && !got_rev_arg) { /* If no revs specified, add default (HEAD) as a pending obj */
 		struct object_id oid;
 		struct object *object;
 		struct object_context oc;
@@ -3326,9 +3326,9 @@ int prepare_revision_walk(struct rev_info *revs)
 {
 	int i;
 	struct object_array old_pending;
-	struct commit_list **next = &revs->commits;
+	struct commit_list **next = &revs->commits; /* See comment above commit_list_append() for explanation */
 
-	memcpy(&old_pending, &revs->pending, sizeof(old_pending));
+	memcpy(&old_pending, &revs->pending, sizeof(old_pending)); /* Looks up all pending and adds to revs->commits */
 	revs->pending.nr = 0;
 	revs->pending.alloc = 0;
 	revs->pending.objects = NULL;
@@ -3359,7 +3359,7 @@ int prepare_revision_walk(struct rev_info *revs)
 	if (revs->no_walk)
 		return 0;
 	if (revs->limited) {
-		if (limit_list(revs) < 0)
+		if (limit_list(revs) < 0) /* This hangs forever when debugging for some reason */
 			return -1;
 		if (revs->topo_order)
 			sort_in_topological_order(&revs->commits, revs->sort_order);
@@ -3911,7 +3911,7 @@ struct commit *get_revision(struct rev_info *revs)
 	struct commit *c;
 	struct commit_list *reversed;
 
-	if (revs->reverse) {
+	if (revs->reverse) { /* If reverse, walk and store all commits */
 		reversed = NULL;
 		while ((c = get_revision_internal(revs)))
 			commit_list_insert(c, &reversed);

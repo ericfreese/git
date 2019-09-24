@@ -10,7 +10,7 @@
 #include "commit-slab-decl.h"
 
 /* Remember to update object flag allocation in object.h */
-#define SEEN		(1u<<0)
+#define SEEN		(1u<<0) /* Added to commit when it's parsed and moved from rev->pending to rev-commits prepare_revision_walk() */
 #define UNINTERESTING   (1u<<1)
 #define TREESAME	(1u<<2)
 #define SHOWN		(1u<<3)
@@ -203,7 +203,7 @@ struct rev_info {
 
 	unsigned int	abbrev;
 	enum cmit_fmt	commit_format;
-	struct log_info *loginfo;
+	struct log_info *loginfo; /* Seems to be used temporarily while logging a single commit */
 	int		nr, total;
 	const char	*mime_boundary;
 	const char	*patch_suffix;
@@ -296,11 +296,11 @@ extern volatile show_early_output_fn_t show_early_output;
 
 struct setup_revision_opt {
 	const char *def;
-	void (*tweak)(struct rev_info *, struct setup_revision_opt *);
+	void (*tweak)(struct rev_info *, struct setup_revision_opt *); /* fn pointer called after all args are parsed to make any necessary changes to the `revs` before walking */
 	const char *submodule;	/* TODO: drop this and use rev_info->repo */
 	unsigned int	assume_dashdash:1,
 			allow_exclude_promisor_objects:1;
-	unsigned revarg_opt;
+	unsigned revarg_opt; /* How to deal with ambiguous rev args (if no `--` provided) */
 };
 
 #ifndef NO_THE_REPOSITORY_COMPATIBILITY_MACROS

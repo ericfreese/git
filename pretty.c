@@ -12,6 +12,7 @@
 #include "reflog-walk.h"
 #include "gpg-interface.h"
 #include "trailer.h"
+#include "sequencer.h"
 
 static char *user_format;
 static struct cmt_fmt_map {
@@ -1254,6 +1255,21 @@ static size_t format_commit_one(struct strbuf *sb, /* in UTF-8 */
 			return 0;
 		strbuf_addstr(sb, *slot);
 		return 1;
+	case 'R':		/* rebase info */
+		switch(placeholder[1]) {
+		case 'n':
+			if (c->pretty_ctx->rebase_todo) {
+				get_todo_commit_number(sb, c->pretty_ctx->rebase_todo, c->commit);
+			}
+			return 2;
+
+		case 'a':
+			if (c->pretty_ctx->rebase_todo) {
+				get_todo_commit_action(sb, c->pretty_ctx->rebase_todo, c->commit);
+			}
+			return 2;
+		}
+		return 0;	/* unknown %R placeholder */
 	case 'g':		/* reflog info */
 		switch(placeholder[1]) {
 		case 'd':	/* reflog selector */
@@ -1589,6 +1605,9 @@ static size_t userformat_want_item(struct strbuf *sb, const char *placeholder,
 		break;
 	case 'S':
 		w->source = 1;
+		break;
+	case 'R':
+		w->rebase = 1;
 		break;
 	}
 	return 0;

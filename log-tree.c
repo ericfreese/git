@@ -696,6 +696,7 @@ void show_log(struct rev_info *opt)
 	ctx.after_subject = extra_headers;
 	ctx.preserve_subject = opt->preserve_subject;
 	ctx.reflog_info = opt->reflog_info;
+	ctx.rebase_todo = opt->rebase_todo;
 	ctx.fmt = opt->commit_format;
 	ctx.mailmap = opt->mailmap;
 	ctx.color = opt->diffopt.use_color;

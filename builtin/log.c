@@ -35,6 +35,7 @@
 #include "commit-reach.h"
 #include "interdiff.h"
 #include "range-diff.h"
+#include "sequencer.h"
 
 #define MAIL_DEFAULT_WRAP 72
 
@@ -217,6 +218,9 @@ static void cmd_log_init_finish(int argc, const char **argv, const char *prefix,
 		init_revision_sources(&revision_sources);
 		rev->sources = &revision_sources;
 	}
+
+	if (!rev->rebase_todo && w.rebase)
+		init_rebase_todo(&rev->rebase_todo);
 
 	if (mailmap) {
 		rev->mailmap = xcalloc(1, sizeof(struct string_list));

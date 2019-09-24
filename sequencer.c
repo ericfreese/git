@@ -2205,6 +2205,25 @@ int sequencer_get_last_command(struct repository *r, enum replay_action *action)
 	return ret;
 }
 
+ssize_t init_rebase_todo(struct todo_list **todo_list) {
+	const char *todo_file = rebase_path_todo();
+	*todo_list = xcalloc(1, sizeof(struct todo_list));
+	strbuf_init(&(*todo_list)->buf, 32);
+
+	if (strbuf_read_file(&(*todo_list)->buf, todo_file, 0) < 0) {
+		free(*todo_list);
+		*todo_list = NULL;
+		return -1;
+	}
+
+	if (todo_list_parse_insn_buffer(the_repository, (*todo_list)->buf.buf, *todo_list)) {
+		todo_list_release(*todo_list);
+		die(_("unusable todo list: '%s'"), todo_file);
+	}
+
+	return 0;
+}
+
 int todo_list_parse_insn_buffer(struct repository *r, char *buf,
 				struct todo_list *todo_list)
 {
@@ -5304,4 +5323,27 @@ int todo_list_rearrange_squash(struct todo_list *todo_list)
 	clear_commit_todo_item(&commit_todo);
 
 	return 0;
+}
+
+void get_todo_commit_action(struct strbuf *sb, struct todo_list *todo_list,
+			    const struct commit *commit) {
+	int i;
+	for (i = todo_list->done_nr; i < todo_list->nr; i++) {
+		if (oideq(&todo_list->items[i].commit->object.oid, &commit->object.oid)) {
+			strbuf_addf(sb, "%s", command_to_string(
+				    todo_list->items[i].command));
+			break;
+		}
+	}
+}
+
+void get_todo_commit_number(struct strbuf *sb, struct todo_list *todo_list,
+			    const struct commit *commit) {
+	int i;
+	for (i = todo_list->done_nr; i < todo_list->nr; i++) {
+		if (oideq(&todo_list->items[i].commit->object.oid, &commit->object.oid)) {
+			strbuf_addf(sb, "%d", i);
+			break;
+		}
+	}
 }

@@ -38,6 +38,7 @@ struct pretty_print_context {
 	int need_8bit_cte;
 	char *notes_message;
 	struct reflog_walk_info *reflog_info;
+	struct todo_list *rebase_todo;
 	struct rev_info *rev;
 	const char *output_encoding;
 	struct string_list *mailmap;
@@ -61,6 +62,7 @@ static inline int cmit_fmt_is_mail(enum cmit_fmt fmt)
 struct userformat_want {
 	unsigned notes:1;
 	unsigned source:1;
+	unsigned rebase:1;
 };
 
 /* Set the flag "w->notes" if there is placeholder %N in "fmt". */

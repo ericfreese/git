@@ -210,3 +210,9 @@ int write_basic_state(struct replay_opts *opts, const char *head_name,
 void sequencer_post_commit_cleanup(struct repository *r, int verbose);
 int sequencer_get_last_command(struct repository* r,
 			       enum replay_action *action);
+ssize_t init_rebase_todo(struct todo_list **todo_list);
+void get_todo_commit_action(struct strbuf *sb, struct todo_list *todo_list,
+			    const struct commit *commit);
+void get_todo_commit_number(struct strbuf *sb, struct todo_list *todo_list,
+			    const struct commit *commit);
+

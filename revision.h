@@ -243,6 +243,7 @@ struct rev_info {
 	struct diff_options pruning;
 
 	struct reflog_walk_info *reflog_info;
+	struct todo_list *rebase_todo;
 	struct decoration children;
 	struct decoration merge_simplification;
 	struct decoration treesame;
@@ -341,6 +342,7 @@ void add_pending_oid(struct rev_info *revs,
 
 void add_head_to_pending(struct rev_info *);
 void add_reflogs_to_pending(struct rev_info *, unsigned int flags);
+void add_rebase_todo_to_pending(struct rev_info *revs);
 void add_index_objects_to_pending(struct rev_info *, unsigned int flags);
 
 enum commit_action {

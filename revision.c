@@ -28,6 +28,7 @@
 #include "commit-graph.h"
 #include "prio-queue.h"
 #include "hashmap.h"
+#include "sequencer.h"
 
 volatile show_early_output_fn_t show_early_output;
 
@@ -1477,6 +1478,16 @@ void add_reflogs_to_pending(struct rev_info *revs, unsigned flags)
 		add_other_reflogs_to_pending(&cb);
 }
 
+void add_rebase_todo_to_pending(struct rev_info *revs) {
+	int i;
+	if (!revs->rebase_todo)
+		return;
+
+	for (i = revs->rebase_todo->done_nr; i < revs->rebase_todo->nr; i++) {
+		add_pending_object(revs, &revs->rebase_todo->items[i].commit->object, "");
+	}
+}
+
 static void add_cache_tree(struct cache_tree *it, struct rev_info *revs,
 			   struct strbuf *path, unsigned int flags)
 {
@@ -2467,6 +2478,9 @@ static int handle_revision_pseudo_opt(const char *submodule,
 		clear_ref_exclusion(&revs->ref_excludes);
 	} else if (!strcmp(arg, "--reflog")) {
 		add_reflogs_to_pending(revs, *flags);
+	} else if (!strcmp(arg, "--rebase-todo")) {
+		init_rebase_todo(&revs->rebase_todo);
+		add_rebase_todo_to_pending(revs);
 	} else if (!strcmp(arg, "--indexed-objects")) {
 		add_index_objects_to_pending(revs, *flags);
 	} else if (!strcmp(arg, "--alternate-refs")) {
